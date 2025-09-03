@@ -82,7 +82,9 @@ function App() {
       // Show message if using fallback
       if (interpretation.fallback) {
         setTimeout(() => {
-          alert('Note: OpenAI API temporarily unavailable. Using intelligent fallback interpretation.');
+          const debugInfo = interpretation.debug ? 
+            `\n\nDebug Info:\n- Error: ${interpretation.debug.error}\n- Has API Key: ${interpretation.debug.hasApiKey}\n- Key Prefix: ${interpretation.debug.keyPrefix}` : '';
+          alert(`Note: OpenAI API temporarily unavailable. Using intelligent fallback interpretation.${debugInfo}`);
         }, 1000);
       }
       

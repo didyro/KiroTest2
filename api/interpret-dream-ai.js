@@ -83,7 +83,25 @@ Keep responses insightful but concise. Focus on practical actions the person can
   } catch (error) {
     console.error('Error calling OpenAI:', error);
     
-    // Return fallback interpretation
+    // Get more specific error information
+    let errorMessage = 'Unknown error';
+    let errorCode = 'UNKNOWN';
+    
+    if (error.message.includes('401')) {
+      errorMessage = 'Invalid API key';
+      errorCode = 'INVALID_KEY';
+    } else if (error.message.includes('429')) {
+      errorMessage = 'Rate limit exceeded or insufficient credits';
+      errorCode = 'RATE_LIMIT';
+    } else if (error.message.includes('400')) {
+      errorMessage = 'Bad request to OpenAI';
+      errorCode = 'BAD_REQUEST';
+    } else if (!process.env.OPENAI_API_KEY) {
+      errorMessage = 'OpenAI API key not configured';
+      errorCode = 'NO_KEY';
+    }
+    
+    // Return fallback interpretation with debug info
     res.status(200).json({
       themes: ["subconscious", "exploration", "mystery"],
       emotions: ["curiosity", "wonder", "intrigue"],
@@ -94,7 +112,13 @@ Keep responses insightful but concise. Focus on practical actions the person can
         "Write down any emotions or memories the dream triggered",
         "Consider how the dream's themes might relate to your current life situation"
       ],
-      fallback: true
+      fallback: true,
+      debug: {
+        error: errorMessage,
+        code: errorCode,
+        hasApiKey: !!process.env.OPENAI_API_KEY,
+        keyPrefix: process.env.OPENAI_API_KEY ? process.env.OPENAI_API_KEY.substring(0, 7) + '...' : 'none'
+      }
     });
   }
 }
