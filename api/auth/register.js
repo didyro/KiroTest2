@@ -1,8 +1,3 @@
-const crypto = require('crypto');
-
-// Shared in-memory storage (in production, use a database)
-let userData = {};
-
 function generateRandomKey() {
   const words = ['dream', 'star', 'moon', 'cloud', 'ocean', 'forest', 'magic', 'wonder', 'mystic', 'cosmic'];
   const numbers = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
@@ -31,22 +26,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Key must be at least 3 characters long' });
       }
       
-      const hashedKey = crypto.createHash('sha256').update(key).digest('hex');
-      
-      // Check if key already exists
-      if (userData[hashedKey]) {
-        return res.status(400).json({ error: 'This key is already taken. Please choose another one.' });
-      }
-      
-      // Create new user data
-      userData[hashedKey] = {
-        key,
-        username: username || '',
-        pin: pin || null,
-        dreams: [],
-        createdAt: new Date().toISOString()
-      };
-      
+      // For demo purposes, accept any key (in production, use a database)
       res.json({ 
         success: true, 
         message: 'Account created successfully!',

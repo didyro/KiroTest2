@@ -1,8 +1,3 @@
-const crypto = require('crypto');
-
-// Shared in-memory storage (in production, use a database)
-let userData = {};
-
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -26,21 +21,13 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Key is required' });
     }
     
-    const hashedKey = crypto.createHash('sha256').update(key).digest('hex');
-    
-    if (!userData[hashedKey]) {
-      return res.status(401).json({ error: 'Invalid key' });
-    }
-    
-    if (username !== undefined) userData[hashedKey].username = username;
-    if (pin !== undefined) userData[hashedKey].pin = pin;
-    
+    // For demo purposes, accept any updates (no persistent storage)
     res.json({ 
       success: true, 
       user: { 
-        key: userData[hashedKey].key, 
-        username: userData[hashedKey].username, 
-        hasPin: !!userData[hashedKey].pin 
+        key: key, 
+        username: username || '', 
+        hasPin: !!pin 
       }
     });
   } catch (error) {

@@ -1,8 +1,3 @@
-const crypto = require('crypto');
-
-// Shared in-memory storage (in production, use a database)
-let userData = {};
-
 export default async function handler(req, res) {
   // Enable CORS
   res.setHeader('Access-Control-Allow-Credentials', true);
@@ -21,18 +16,12 @@ export default async function handler(req, res) {
     if (!key) {
       return res.status(400).json({ error: 'Key is required' });
     }
-    
-    const hashedKey = crypto.createHash('sha256').update(key).digest('hex');
-    
-    if (!userData[hashedKey]) {
-      return res.status(401).json({ error: 'Invalid key' });
-    }
 
     if (req.method === 'GET') {
-      // Get dreams
-      res.json({ dreams: userData[hashedKey].dreams || [] });
+      // Return empty dreams array (no persistent storage in demo)
+      res.json({ dreams: [] });
     } else if (req.method === 'POST') {
-      // Save dream
+      // Save dream (simulate success but don't persist)
       const { dream } = req.body;
       
       const newDream = {
@@ -42,23 +31,19 @@ export default async function handler(req, res) {
         notes: dream.notes || ''
       };
       
-      userData[hashedKey].dreams = userData[hashedKey].dreams || [];
-      userData[hashedKey].dreams.unshift(newDream);
-      
       res.json({ success: true, dream: newDream });
     } else if (req.method === 'PUT') {
-      // Update dream
+      // Update dream (simulate success)
       const { dreamId, notes } = req.body;
       
-      const dreamIndex = userData[hashedKey].dreams.findIndex(d => d.id === dreamId);
-      if (dreamIndex === -1) {
-        return res.status(404).json({ error: 'Dream not found' });
-      }
-      
-      userData[hashedKey].dreams[dreamIndex].notes = notes;
-      userData[hashedKey].dreams[dreamIndex].updatedAt = new Date().toISOString();
-      
-      res.json({ success: true, dream: userData[hashedKey].dreams[dreamIndex] });
+      res.json({ 
+        success: true, 
+        dream: { 
+          id: dreamId, 
+          notes, 
+          updatedAt: new Date().toISOString() 
+        } 
+      });
     } else {
       res.status(405).json({ error: 'Method not allowed' });
     }

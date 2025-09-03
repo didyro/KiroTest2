@@ -11,10 +11,7 @@ const Auth = ({ onLogin }) => {
 
   const generateRandomKey = async () => {
     try {
-      const response = await fetch('/api/auth/generate-key', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
-      });
+      const response = await fetch('/api/auth/register?action=generate-key');
       const data = await response.json();
       setKey(data.key);
     } catch (error) {
