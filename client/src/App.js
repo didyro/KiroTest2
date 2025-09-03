@@ -112,7 +112,7 @@ function App() {
     const newDream = { ...dreamData, id: Date.now() };
     const updatedDreams = [newDream, ...dreams];
     setDreams(updatedDreams);
-    
+
     // Save to localStorage
     if (user) {
       localStorage.setItem(`soamnia_dreams_${user.key}`, JSON.stringify(updatedDreams));
@@ -122,9 +122,9 @@ function App() {
   // Error fallback
   if (error) {
     return (
-      <div style={{ 
-        padding: '2rem', 
-        textAlign: 'center', 
+      <div style={{
+        padding: '2rem',
+        textAlign: 'center',
         background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
         minHeight: '100vh',
         color: 'white',
@@ -135,7 +135,7 @@ function App() {
       }}>
         <h1>✨ Soamnia</h1>
         <p>Something went wrong. Let's start fresh!</p>
-        <button 
+        <button
           onClick={() => {
             localStorage.clear();
             setError(null);
@@ -174,19 +174,19 @@ function App() {
       </header>
 
       <nav className="app-nav">
-        <button 
+        <button
           className={currentView === 'input' ? 'nav-btn active' : 'nav-btn'}
           onClick={() => setCurrentView('input')}
         >
           New Dream
         </button>
-        <button 
+        <button
           className={currentView === 'journal' ? 'nav-btn active' : 'nav-btn'}
           onClick={() => setCurrentView('journal')}
         >
           Dream Journal ({dreams.length})
         </button>
-        <button 
+        <button
           className={currentView === 'profile' ? 'nav-btn active' : 'nav-btn'}
           onClick={() => setCurrentView('profile')}
         >
@@ -198,28 +198,29 @@ function App() {
         {currentView === 'input' && (
           <DreamInput onSubmit={handleDreamSubmit} loading={loading} />
         )}
-        
+
         {currentView === 'interpretation' && interpretation && (
-          <DreamInterpretation 
+          <DreamInterpretation
             interpretation={interpretation}
             onSave={saveDream}
             onNewDream={() => setCurrentView('input')}
           />
         )}
-        
+
         {currentView === 'journal' && (
-          <DreamJournal 
+          <DreamJournal
             dreams={dreams}
             user={user}
             onViewDream={(dream) => {
               setInterpretation(dream);
               setCurrentView('interpretation');
             }}
+            onUpdateDreams={setDreams}
           />
         )}
 
         {currentView === 'profile' && (
-          <UserProfile 
+          <UserProfile
             user={user}
             onUpdateUser={setUser}
             onLogout={handleLogout}

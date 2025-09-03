@@ -68,7 +68,7 @@ const DreamInput = ({ onSubmit, loading }) => {
             className="dream-textarea"
             value={dreamText}
             onChange={(e) => setDreamText(e.target.value)}
-            placeholder="I dreamed that I was flying over a beautiful landscape..."
+            placeholder="I dreamed that I was flying over a beautiful landscape... (Type your dream here or use voice recording below)"
             disabled={loading}
           />
         </div>
@@ -97,6 +97,10 @@ const DreamInput = ({ onSubmit, loading }) => {
           type="submit"
           className="submit-btn"
           disabled={!dreamText.trim() || loading}
+          style={{
+            opacity: !dreamText.trim() ? 0.5 : 1,
+            cursor: !dreamText.trim() ? 'not-allowed' : 'pointer'
+          }}
         >
           {loading ? (
             <div className="loading">

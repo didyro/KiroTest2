@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 
-const DreamJournal = ({ dreams, onViewDream, user }) => {
+const DreamJournal = ({ dreams, onViewDream, user, onUpdateDreams }) => {
   const [selectedDream, setSelectedDream] = useState(null);
   const [notes, setNotes] = useState('');
   const [isEditingNotes, setIsEditingNotes] = useState(false);
@@ -31,24 +31,33 @@ const DreamJournal = ({ dreams, onViewDream, user }) => {
     
     setLoading(true);
     try {
-      const response = await fetch(`/api/dreams/${selectedDream.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          key: user.key,
-          notes
-        })
-      });
-
-      if (response.ok) {
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Update the dream with notes in localStorage
+      const savedDreams = localStorage.getItem(`soamnia_dreams_${user.key}`);
+      if (savedDreams) {
+        const dreams = JSON.parse(savedDreams);
+        const updatedDreams = dreams.map(dream => 
+          dream.id === selectedDream.id 
+            ? { ...dream, notes }
+            : dream
+        );
+        localStorage.setItem(`soamnia_dreams_${user.key}`, JSON.stringify(updatedDreams));
+        
+        // Update the selected dream state
         const updatedDream = { ...selectedDream, notes };
         setSelectedDream(updatedDream);
         setIsEditingNotes(false);
-        // Trigger a refresh of the dreams list
-        window.location.reload();
+        
+        // Update parent component's dreams list
+        if (onUpdateDreams) {
+          onUpdateDreams(updatedDreams);
+        }
       }
     } catch (error) {
       console.error('Error saving notes:', error);
+      alert('Failed to save notes. Please try again.');
     } finally {
       setLoading(false);
     }
