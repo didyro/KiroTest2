@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Dream API</title>
+</head>
+<body>
+    <h1>Test Dream Interpretation API</h1>
+    <textarea id="dreamText" placeholder="Enter a dream..." rows="4" cols="50">I dreamed I was flying over a beautiful forest</textarea><br><br>
+    <button onclick="testAPI()">Test API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const dreamText = document.getElementById('dreamText').value;
+            const resultDiv = document.getElementById('result');
+            
+            resultDiv.innerHTML = 'Loading...';
+            
+            try {
+                const response = await fetch('/api/interpret-dream-ai', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ dreamText })
+                });
+                
+                const data = await response.json();
+                resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+            } catch (error) {
+                resultDiv.innerHTML = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>
