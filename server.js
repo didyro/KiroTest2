@@ -12,7 +12,9 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use(express.static('client/build'));
+
+// Serve static files from the React app build directory
+app.use(express.static(path.join(__dirname, 'client/build')));
 
 // Initialize OpenAI
 let openai = null;
@@ -310,6 +312,13 @@ app.put('/api/dreams/:dreamId', (req, res) => {
   }
 });
 
+// Catch all handler: send back React's index.html file for any non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'client/build', 'index.html'));
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+  console.log(`🌟 Soamnia is ready!`);
+  console.log(`📱 Open http://localhost:${PORT} to access the app`);
 });

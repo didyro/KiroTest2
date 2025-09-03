@@ -323,8 +323,8 @@ body {
     padding: 1rem;
   }
 }
-/
-* Authentication Styles */
+
+/* Authentication Styles */
 .auth-container {
   min-height: 100vh;
   display: flex;

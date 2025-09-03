@@ -32,33 +32,44 @@ The app is fully built and the **server is currently running** on port 5000!
 
 ## 🚀 Full App Setup
 
-### Option 1: Use the Batch Files (Easiest)
+### Option 1: Development Mode (Easiest)
 ```bash
-# Run both server and client
+# Run both server and client in development
 run-app.bat
 
-# Or run setup first, then start
-setup.bat
-start.bat
+# Or manually
+npm run dev
 ```
 
-### Option 2: Manual Setup
+### Option 2: Production Build
 ```bash
-# 1. Install dependencies (if not done)
+# Build and deploy for production
+deploy.bat
+
+# Or manually
+npm run build
+npm start
+```
+
+### Option 3: Manual Setup
+```bash
+# 1. Install dependencies
 npm install
 cd client && npm install && cd ..
 
-# 2. Start server (already running!)
-npm run server
+# 2. Development mode
+npm run dev
 
-# 3. Start client (in new terminal)
-cd client && npm start
+# 3. Production mode
+npm run build && npm start
 ```
 
 ## 🌐 Access Points
-- **Test Page**: Open `test.html` in browser
-- **Full App**: http://localhost:3000 (when client starts)
-- **API Server**: http://localhost:5000
+- **Production App**: http://localhost:5000 (built React app)
+- **Development**: http://localhost:3000 (dev server) + http://localhost:5000 (API)
+- **Test Pages**: 
+  - `test-auth.html` - Authentication system test
+  - `test.html` - Dream API test
 
 ## 🔑 OpenAI API Key (Optional)
 - **Demo Mode**: Works without API key (uses sample responses)
