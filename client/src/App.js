@@ -57,52 +57,98 @@ function App() {
   const handleDreamSubmit = async (dreamText) => {
     setLoading(true);
     try {
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Call OpenAI API directly from client
+      const response = await fetch('https://api.openai.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.REACT_APP_OPENAI_API_KEY || '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'}`
+        },
+        body: JSON.stringify({
+          model: 'gpt-3.5-turbo',
+          messages: [
+            {
+              role: 'system',
+              content: `You are Soamnia, an AI dream interpreter that helps people understand their dreams and provides actionable micro-goals. 
 
-      // Generate demo interpretation
-      const demoInterpretations = [
-        {
-          themes: ["adventure", "freedom", "exploration"],
-          emotions: ["excitement", "curiosity", "wonder"],
-          symbols: ["flying", "mountains", "sky"],
-          interpretation: "This dream suggests a desire for freedom and adventure in your life. The act of flying represents liberation from constraints, while the mountains symbolize challenges you're ready to overcome.",
+Analyze the dream and respond with a JSON object containing:
+- themes: array of 2-4 main themes (e.g., "adventure", "relationships", "growth")
+- emotions: array of 2-4 emotions present (e.g., "excitement", "fear", "curiosity")  
+- symbols: array of 2-4 key symbols (e.g., "water", "flying", "animals")
+- interpretation: detailed interpretation paragraph (2-3 sentences)
+- microGoals: array of exactly 3 specific, actionable micro-goals that relate to the dream's meaning
+
+Keep responses insightful but concise. Focus on practical actions the person can take.`
+            },
+            {
+              role: 'user',
+              content: `Please interpret this dream: "${dreamText}"`
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.7
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error(`OpenAI API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const aiResponse = data.choices[0].message.content;
+      
+      // Try to parse as JSON, fallback to structured parsing if needed
+      let interpretation;
+      try {
+        interpretation = JSON.parse(aiResponse);
+      } catch (parseError) {
+        // Fallback: extract information from text response
+        interpretation = {
+          themes: ["mystery", "subconscious", "exploration"],
+          emotions: ["curiosity", "wonder", "intrigue"],
+          symbols: ["dreams", "mind", "journey"],
+          interpretation: aiResponse.substring(0, 200) + "...",
           microGoals: [
-            "Plan a weekend outdoor adventure",
-            "Try a new activity that challenges your comfort zone",
-            "Set a goal that feels slightly out of reach"
+            "Reflect on the emotions this dream brought up",
+            "Journal about any connections to your waking life",
+            "Pay attention to recurring dream themes"
           ]
-        },
+        };
+      }
+
+      setInterpretation({ 
+        ...interpretation, 
+        dreamText, 
+        timestamp: new Date() 
+      });
+      setCurrentView('interpretation');
+      
+    } catch (error) {
+      console.error('Error calling OpenAI:', error);
+      
+      // Fallback to demo interpretation if API fails
+      const fallbackInterpretations = [
         {
-          themes: ["relationships", "communication", "connection"],
-          emotions: ["love", "warmth", "belonging"],
-          symbols: ["friends", "gathering", "home"],
-          interpretation: "Your dream reflects the importance of relationships and connection in your life. It suggests a need for deeper bonds and meaningful conversations with those around you.",
+          themes: ["subconscious", "exploration", "mystery"],
+          emotions: ["curiosity", "wonder", "intrigue"],
+          symbols: ["journey", "discovery", "hidden meanings"],
+          interpretation: "Your dream contains rich symbolism that reflects your inner thoughts and desires. The imagery suggests you're processing important life experiences and seeking deeper understanding of yourself.",
           microGoals: [
-            "Reach out to a friend you haven't spoken to recently",
-            "Plan a gathering with people you care about",
-            "Have a meaningful conversation with someone today"
-          ]
-        },
-        {
-          themes: ["growth", "transformation", "potential"],
-          emotions: ["hope", "determination", "confidence"],
-          symbols: ["water", "journey", "light"],
-          interpretation: "This dream indicates you're in a period of personal growth and transformation. The symbols suggest you're ready to embrace change and discover new aspects of yourself.",
-          microGoals: [
-            "Start learning something you've always wanted to try",
-            "Take one small step toward a personal goal",
-            "Reflect on how you've grown in the past year"
+            "Take 10 minutes today to reflect on what this dream might mean to you",
+            "Write down any emotions or memories the dream triggered",
+            "Consider how the dream's themes might relate to your current life situation"
           ]
         }
       ];
-
-      const randomInterpretation = demoInterpretations[Math.floor(Math.random() * demoInterpretations.length)];
-      setInterpretation({ ...randomInterpretation, dreamText, timestamp: new Date() });
+      
+      const fallback = fallbackInterpretations[0];
+      setInterpretation({ ...fallback, dreamText, timestamp: new Date() });
       setCurrentView('interpretation');
-    } catch (error) {
-      console.error('Error:', error);
-      alert('Failed to interpret dream. Please try again.');
+      
+      // Show user that we used fallback
+      setTimeout(() => {
+        alert('Note: Using offline interpretation due to API connection issue. For full AI analysis, check your internet connection.');
+      }, 1000);
     } finally {
       setLoading(false);
     }
