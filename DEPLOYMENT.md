@@ -75,9 +75,35 @@ For production use, consider:
 5. **Caching**: Implement Redis for better performance
 
 ## 🚀 **Deploy Now**
-Your app is ready to deploy! Just run:
+
+### Quick Deploy
+1. Push your code to GitHub
+2. Connect to Vercel at [vercel.com](https://vercel.com)
+3. Import your repository
+4. Vercel will automatically detect the configuration
+
+### Or via CLI
 ```bash
+# Install Vercel CLI
+npm i -g vercel
+
+# Deploy
 vercel
+
+# Follow prompts and your app will be live!
 ```
 
+### Build Configuration
+The app uses a custom build process:
+- **Install**: `npm install` (root dependencies)
+- **Build**: `cd client && npm ci && npm run build` (React app)
+- **Output**: `client/build` (static files)
+- **Functions**: `api/**/*.js` (serverless functions)
+
 The app will be live at your Vercel URL (e.g., `soamnia-xyz.vercel.app`)
+
+## 🔧 **Troubleshooting**
+If you get build errors:
+1. Make sure both root and client `package.json` files are committed
+2. Ensure all dependencies are listed in `client/package.json`
+3. Check that the build command works locally: `cd client && npm install && npm run build`
