@@ -9,14 +9,12 @@ const Auth = ({ onLogin }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const generateRandomKey = async () => {
-    try {
-      const response = await fetch('/api/auth/register?action=generate-key');
-      const data = await response.json();
-      setKey(data.key);
-    } catch (error) {
-      console.error('Error generating key:', error);
-    }
+  const generateRandomKey = () => {
+    const words = ['dream', 'star', 'moon', 'cloud', 'ocean', 'forest', 'magic', 'wonder', 'mystic', 'cosmic'];
+    const numbers = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
+    const word1 = words[Math.floor(Math.random() * words.length)];
+    const word2 = words[Math.floor(Math.random() * words.length)];
+    setKey(`${word1}-${word2}-${numbers}`);
   };
 
   const handleSubmit = async (e) => {
@@ -31,27 +29,26 @@ const Auth = ({ onLogin }) => {
         return;
       }
 
-      const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
-      const body = isLogin 
-        ? { key, pin }
-        : { key, username, pin: pin || null };
+      // Simulate API delay for better UX
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const response = await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem('soamnia_user', JSON.stringify(data.user));
-        onLogin(data.user);
-      } else {
-        setError(data.error || 'Authentication failed');
+      // For demo: accept any key
+      if (!key || key.length < 3) {
+        setError('Key must be at least 3 characters long');
+        setLoading(false);
+        return;
       }
+
+      const userData = {
+        key,
+        username: username || '',
+        hasPin: !!pin
+      };
+
+      localStorage.setItem('soamnia_user', JSON.stringify(userData));
+      onLogin(userData);
     } catch (error) {
-      setError('Network error. Please try again.');
+      setError('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }

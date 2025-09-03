@@ -20,30 +20,23 @@ const UserProfile = ({ user, onUpdateUser, onLogout }) => {
         return;
       }
 
-      const response = await fetch('/api/user/update-profile', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          key: user.key,
-          username,
-          pin: newPin || undefined
-        })
-      });
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 1000));
 
-      const data = await response.json();
+      const updatedUser = {
+        ...user,
+        username,
+        hasPin: !!newPin || user.hasPin
+      };
 
-      if (response.ok) {
-        onUpdateUser(data.user);
-        localStorage.setItem('soamnia_user', JSON.stringify(data.user));
-        setMessage('Profile updated successfully!');
-        setIsEditing(false);
-        setNewPin('');
-        setConfirmPin('');
-      } else {
-        setMessage(data.error || 'Update failed');
-      }
+      onUpdateUser(updatedUser);
+      localStorage.setItem('soamnia_user', JSON.stringify(updatedUser));
+      setMessage('Profile updated successfully!');
+      setIsEditing(false);
+      setNewPin('');
+      setConfirmPin('');
     } catch (error) {
-      setMessage('Network error. Please try again.');
+      setMessage('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }

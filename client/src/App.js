@@ -23,15 +23,11 @@ function App() {
     }
   }, []);
 
-  const loadUserDreams = async (key) => {
-    try {
-      const response = await fetch(`/api/dreams?key=${encodeURIComponent(key)}`);
-      if (response.ok) {
-        const data = await response.json();
-        setDreams(data.dreams);
-      }
-    } catch (error) {
-      console.error('Error loading dreams:', error);
+  const loadUserDreams = (key) => {
+    // Load dreams from localStorage
+    const savedDreams = localStorage.getItem(`soamnia_dreams_${key}`);
+    if (savedDreams) {
+      setDreams(JSON.parse(savedDreams));
     }
   };
 
@@ -50,20 +46,48 @@ function App() {
   const handleDreamSubmit = async (dreamText) => {
     setLoading(true);
     try {
-      const response = await fetch('/api/interpret-dream', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+
+      // Generate demo interpretation
+      const demoInterpretations = [
+        {
+          themes: ["adventure", "freedom", "exploration"],
+          emotions: ["excitement", "curiosity", "wonder"],
+          symbols: ["flying", "mountains", "sky"],
+          interpretation: "This dream suggests a desire for freedom and adventure in your life. The act of flying represents liberation from constraints, while the mountains symbolize challenges you're ready to overcome.",
+          microGoals: [
+            "Plan a weekend outdoor adventure",
+            "Try a new activity that challenges your comfort zone",
+            "Set a goal that feels slightly out of reach"
+          ]
         },
-        body: JSON.stringify({ dreamText }),
-      });
+        {
+          themes: ["relationships", "communication", "connection"],
+          emotions: ["love", "warmth", "belonging"],
+          symbols: ["friends", "gathering", "home"],
+          interpretation: "Your dream reflects the importance of relationships and connection in your life. It suggests a need for deeper bonds and meaningful conversations with those around you.",
+          microGoals: [
+            "Reach out to a friend you haven't spoken to recently",
+            "Plan a gathering with people you care about",
+            "Have a meaningful conversation with someone today"
+          ]
+        },
+        {
+          themes: ["growth", "transformation", "potential"],
+          emotions: ["hope", "determination", "confidence"],
+          symbols: ["water", "journey", "light"],
+          interpretation: "This dream indicates you're in a period of personal growth and transformation. The symbols suggest you're ready to embrace change and discover new aspects of yourself.",
+          microGoals: [
+            "Start learning something you've always wanted to try",
+            "Take one small step toward a personal goal",
+            "Reflect on how you've grown in the past year"
+          ]
+        }
+      ];
 
-      if (!response.ok) {
-        throw new Error('Failed to interpret dream');
-      }
-
-      const result = await response.json();
-      setInterpretation({ ...result, dreamText, timestamp: new Date() });
+      const randomInterpretation = demoInterpretations[Math.floor(Math.random() * demoInterpretations.length)];
+      setInterpretation({ ...randomInterpretation, dreamText, timestamp: new Date() });
       setCurrentView('interpretation');
     } catch (error) {
       console.error('Error:', error);
@@ -73,33 +97,14 @@ function App() {
     }
   };
 
-  const saveDream = async (dreamData) => {
-    if (!user) {
-      // Fallback to local storage for non-authenticated users
-      const newDream = { ...dreamData, id: Date.now() };
-      setDreams(prev => [newDream, ...prev]);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/dreams', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          key: user.key,
-          dream: dreamData
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setDreams(prev => [data.dream, ...prev]);
-      }
-    } catch (error) {
-      console.error('Error saving dream:', error);
-      alert('Failed to save dream. Please try again.');
+  const saveDream = (dreamData) => {
+    const newDream = { ...dreamData, id: Date.now() };
+    const updatedDreams = [newDream, ...dreams];
+    setDreams(updatedDreams);
+    
+    // Save to localStorage
+    if (user) {
+      localStorage.setItem(`soamnia_dreams_${user.key}`, JSON.stringify(updatedDreams));
     }
   };
 
