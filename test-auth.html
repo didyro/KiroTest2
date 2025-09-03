@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soamnia Auth Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            border: none;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            cursor: pointer;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔑 Soamnia Authentication Test</h1>
+        
+        <div class="test-section">
+            <h3>Generate Random Key</h3>
+            <button onclick="generateKey()">🎲 Generate Random Key</button>
+            <div id="keyResult"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Register New Account</h3>
+            <input type="text" id="regKey" placeholder="Your key">
+            <input type="text" id="regUsername" placeholder="Username (optional)">
+            <input type="password" id="regPin" placeholder="PIN (optional)" maxlength="4">
+            <button onclick="register()">✨ Register</button>
+        </div>
+
+        <div class="test-section">
+            <h3>Login</h3>
+            <input type="text" id="loginKey" placeholder="Your key">
+            <input type="password" id="loginPin" placeholder="PIN (if set)" maxlength="4">
+            <button onclick="login()">🔑 Login</button>
+        </div>
+
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function generateKey() {
+            try {
+                const response = await fetch('/api/auth/generate-key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await response.json();
+                document.getElementById('keyResult').innerHTML = `<p>Generated Key: <strong>${data.key}</strong></p>`;
+                document.getElementById('regKey').value = data.key;
+            } catch (error) {
+                document.getElementById('keyResult').innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+            }
+        }
+
+        async function register() {
+            const key = document.getElementById('regKey').value;
+            const username = document.getElementById('regUsername').value;
+            const pin = document.getElementById('regPin').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!key) {
+                resultDiv.innerHTML = '<p style="color: #ff6b6b;">Please enter a key!</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, username, pin })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <h3>✅ Registration Successful!</h3>
+                        <p><strong>Key:</strong> ${data.user.key}</p>
+                        <p><strong>Username:</strong> ${data.user.username || 'Not set'}</p>
+                        <p><strong>PIN Protected:</strong> ${data.user.hasPin ? 'Yes' : 'No'}</p>
+                    `;
+                    // Auto-fill login form
+                    document.getElementById('loginKey').value = key;
+                    document.getElementById('loginPin').value = pin;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: #ff6b6b;">Registration Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: #ff6b6b;">Network Error: ${error.message}</p>`;
+            }
+        }
+
+        async function login() {
+            const key = document.getElementById('loginKey').value;
+            const pin = document.getElementById('loginPin').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!key) {
+                resultDiv.innerHTML = '<p style="color: #ff6b6b;">Please enter a key!</p>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, pin })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <h3>🎉 Login Successful!</h3>
+                        <p><strong>Key:</strong> ${data.user.key}</p>
+                        <p><strong>Username:</strong> ${data.user.username || 'Not set'}</p>
+                        <p><strong>PIN Protected:</strong> ${data.user.hasPin ? 'Yes' : 'No'}</p>
+                        <p style="color: #4caf50;">You can now use the full Soamnia app!</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: #ff6b6b;">Login Error: ${data.error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: #ff6b6b;">Network Error: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

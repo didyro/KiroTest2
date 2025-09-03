@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soamnia API Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: white;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            border-radius: 10px;
+            border: none;
+            margin: 10px 0;
+        }
+        button {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>✨ Soamnia - Dream Interpretation Test</h1>
+        <p>Enter your dream below to test the API:</p>
+        
+        <textarea id="dreamText" placeholder="I dreamed that I was flying over mountains with friends..."></textarea>
+        <br>
+        <button onclick="interpretDream()">✨ Interpret My Dream</button>
+        
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function interpretDream() {
+            const dreamText = document.getElementById('dreamText').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!dreamText.trim()) {
+                resultDiv.innerHTML = '<p style="color: #ff6b6b;">Please enter a dream first!</p>';
+                return;
+            }
+            
+            resultDiv.innerHTML = '<p>🔮 Interpreting your dream...</p>';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/interpret-dream', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ dreamText }),
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok) {
+                    resultDiv.innerHTML = `
+                        <h3>🌟 Dream Interpretation</h3>
+                        <p><strong>Dream:</strong> "${dreamText}"</p>
+                        
+                        <h4>🎭 Themes & Symbols:</h4>
+                        <p>${result.themes.concat(result.symbols).join(', ')}</p>
+                        
+                        <h4>💭 Emotions:</h4>
+                        <p>${result.emotions.join(', ')}</p>
+                        
+                        <h4>🔮 Interpretation:</h4>
+                        <p>${result.interpretation}</p>
+                        
+                        <h4>🎯 Your Action Plan:</h4>
+                        <ol>
+                            ${result.microGoals.map(goal => `<li>${goal}</li>`).join('')}
+                        </ol>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: #ff6b6b;">Error: ${result.error}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: #ff6b6b;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Add some sample dreams
+        document.getElementById('dreamText').value = 'I was flying over mountains with friends';
+    </script>
+</body>
+</html>
